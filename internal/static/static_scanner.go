@@ -1,27 +1,37 @@
 package static
 
 import (
-	"fmt"
 	"io"
 	"regexp"
+	"strings"
 
 	"github.com/farzadamr/ctf-web-tool/internal/httpclient"
 )
 
-func Scan(url string) {
+func Scan(url string) string {
 	resp, err := httpclient.Client.Get(url)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err.Error()
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err.Error()
+	}
 
 	re := regexp.MustCompile(`(?i)<!--.*?-->`)
 	comments := re.FindAllString(string(body), -1)
-	fmt.Println("Comments:")
-	for _, c := range comments {
-		fmt.Println(" ", c)
+
+	if len(comments) == 0 {
+		return "No HTML comments found"
 	}
+
+	var out strings.Builder
+	out.WriteString("Comments:\n")
+	for _, c := range comments {
+		out.WriteString("  " + c + "\n")
+	}
+
+	return out.String()
 }

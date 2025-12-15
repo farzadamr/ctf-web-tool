@@ -1,7 +1,6 @@
 package template
 
 import (
-	"fmt"
 	"io"
 	"net/url"
 
@@ -12,7 +11,7 @@ var payloads = []string{
 	"{{7*7}}", "<%=7*7%>", "{{=7*7}}",
 }
 
-func TestInjection(target string, param string) {
+func TestInjection(target string, param string) string {
 	for _, p := range payloads {
 		u, _ := url.Parse(target)
 		q := u.Query()
@@ -25,7 +24,9 @@ func TestInjection(target string, param string) {
 		}
 		body, _ := io.ReadAll(resp.Body)
 		if string(body) == "49" || string(body) == "77" {
-			fmt.Println("Possible Template Injection →", u.String())
+			out := "Possible Template Injection → " + u.String()
+			return out
 		}
 	}
+	return ""
 }

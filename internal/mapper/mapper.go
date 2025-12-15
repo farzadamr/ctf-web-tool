@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -103,4 +104,36 @@ func scorePaths(paths []string) []Endpoint {
 	}
 
 	return endpoints
+}
+func MapTargetString(target string) string {
+	endpoints, err := MapTarget(target)
+	if err != nil {
+		return err.Error()
+	}
+
+	if len(endpoints) == 0 {
+		return "No endpoints found"
+	}
+
+	var out strings.Builder
+
+	for _, e := range endpoints {
+		level := "LOW"
+		if e.Score >= 7 {
+			level = "HIGH"
+		} else if e.Score >= 4 {
+			level = "MEDIUM"
+		}
+
+		out.WriteString(
+			"[" + level + "] " + e.Path +
+				" (score=" + strconv.Itoa(e.Score) + ")\n",
+		)
+
+		for _, h := range e.Hints {
+			out.WriteString("  - " + h + "\n")
+		}
+	}
+
+	return out.String()
 }
