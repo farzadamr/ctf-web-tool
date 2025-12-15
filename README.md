@@ -34,6 +34,7 @@ ctf-tool jwt -v <jwt>
 ctf-tool template --url https://target --param name
 ctf-tool scan-static --url https://target
 ctf-tool analyze --url https://target
+ctf-tool sqli --url <target> --param <params>
 ```
 ---
 
